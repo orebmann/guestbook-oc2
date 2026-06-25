@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: guestbook-oc
+  namespace: openshift-gitops        # ArgoCD namespace on OpenShift (adjust if different)
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/YOUR_ORG/guestbook-oc.git   # <-- update this
+    targetRevision: HEAD
+    path: chart
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: guestbook              # <-- target namespace for the app
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

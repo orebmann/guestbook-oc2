@@ -1,0 +1,27 @@
+replicaCount: 1
+
+image:
+  repository: registry.access.redhat.com/ubi8/httpd-24
+  tag: latest
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  name: guestbook
+
+service:
+  port: 8080
+
+route:
+  enabled: true
+  host: ""          # leave empty → OpenShift auto-generates hostname
+  tls:
+    enabled: true
+    termination: edge
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi

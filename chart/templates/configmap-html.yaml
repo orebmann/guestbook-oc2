@@ -1,0 +1,138 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "guestbook-oc.fullname" . }}-html
+  labels:
+    app.kubernetes.io/name: {{ include "guestbook-oc.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Guestbook</title>
+      <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+          font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+          background: #f0f4f8;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          padding: 24px;
+        }
+        .card {
+          background: #ffffff;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          padding: 32px;
+          width: 100%;
+          max-width: 480px;
+        }
+        h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; color: #1f2328; }
+        .subtitle { font-size: 13px; color: #57606a; margin-bottom: 24px; }
+        .badge {
+          display: inline-block;
+          font-size: 11px;
+          font-weight: 600;
+          padding: 2px 10px;
+          border-radius: 12px;
+          background: #dcfce7;
+          color: #166534;
+          margin-bottom: 24px;
+        }
+        textarea {
+          width: 100%;
+          height: 80px;
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          padding: 10px 12px;
+          font-size: 14px;
+          resize: vertical;
+          outline: none;
+          font-family: inherit;
+        }
+        textarea:focus { border-color: #3b82d4; }
+        .row { display: flex; gap: 8px; margin-top: 10px; }
+        input[type=text] {
+          flex: 1;
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          padding: 8px 12px;
+          font-size: 14px;
+          outline: none;
+          font-family: inherit;
+        }
+        input[type=text]:focus { border-color: #3b82d4; }
+        button {
+          background: #3b82d4;
+          color: #fff;
+          border: none;
+          border-radius: 6px;
+          padding: 8px 20px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+        }
+        button:hover { background: #2563eb; }
+        .entries { margin-top: 24px; }
+        .entries h2 { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #57606a; text-transform: uppercase; letter-spacing: 0.05em; }
+        .entry {
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          padding: 10px 14px;
+          margin-bottom: 8px;
+          background: #f7f8fa;
+        }
+        .entry .name { font-weight: 600; font-size: 13px; color: #1f2328; }
+        .entry .message { font-size: 13px; color: #57606a; margin-top: 2px; }
+        .empty { font-size: 13px; color: #9ca3af; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <h1>Guestbook</h1>
+        <p class="subtitle">Running on OpenShift via ArgoCD</p>
+        <span class="badge">ubi8/httpd-24 · port 8080 · non-root</span>
+
+        <div>
+          <textarea id="msg" placeholder="Leave a message..."></textarea>
+          <div class="row">
+            <input type="text" id="name" placeholder="Your name">
+            <button onclick="addEntry()">Sign</button>
+          </div>
+        </div>
+
+        <div class="entries">
+          <h2>Entries</h2>
+          <div id="list"><p class="empty">No entries yet. Be the first!</p></div>
+        </div>
+      </div>
+
+      <script>
+        var entries = [];
+        function addEntry() {
+          var msg = document.getElementById('msg').value.trim();
+          var name = document.getElementById('name').value.trim() || 'Anonymous';
+          if (!msg) return;
+          entries.unshift({ name: name, msg: msg });
+          document.getElementById('msg').value = '';
+          render();
+        }
+        function render() {
+          var list = document.getElementById('list');
+          if (entries.length === 0) {
+            list.innerHTML = '<p class="empty">No entries yet. Be the first!</p>';
+            return;
+          }
+          list.innerHTML = entries.map(function(e) {
+            return '<div class="entry"><div class="name">' + esc(e.name) + '</div><div class="message">' + esc(e.msg) + '</div></div>';
+          }).join('');
+        }
+        function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+      </script>
+    </body>
+    </html>
